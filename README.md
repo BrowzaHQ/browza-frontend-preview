@@ -1,7 +1,6 @@
 # Browza Frontend (Next.js)
 
 
-AAAAAABBBBBBBBB
 
 
 ## Quick Start
