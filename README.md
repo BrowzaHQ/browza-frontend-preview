@@ -23,3 +23,10 @@ We document decisions in `docs/adr/`.
 - **ADR-0001 — Data Fetching & State Mgmt**  
   Server data via **TanStack Query**; local UI state with React; **defer Redux** until a real cross-page global state emerges.  
   See `docs/adr/0001-data-fetching-and-state.md`.
+
+## Architecture Decision Records
+We document decisions in `docs/adr/`.
+
+- **ADR-0001 — Data Fetching & State Mgmt**  
+  Server data via **TanStack Query**; local UI state with React; **defer Redux** until a real cross-page global state emerges.  
+  See `docs/adr/0001-data-fetching-and-state.md`.
