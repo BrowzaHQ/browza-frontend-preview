@@ -10,4 +10,7 @@ const nextConfig = {
   }
 };
 
+module.exports = nextConfig; // <-- only one export
 module.exports = nextConfig;
+
+cc303e57dd3d37b3f571bf408dbf84c810d7d516
