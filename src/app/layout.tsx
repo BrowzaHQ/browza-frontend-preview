@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Providers from './providers';
 
 export const metadata: Metadata = {
   title: 'Browza',
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/health" className="underline">Health</a>
           </nav>
         </header>
-        <main className="container mx-auto p-4">{children}</main>
+        <main className="container mx-auto p-4">
+          <Providers>{children}</Providers>
+        </main>
       </body>
     </html>
   );
