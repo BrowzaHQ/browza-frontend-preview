@@ -9,7 +9,6 @@
 
 ## Branching & PRs
 - Branch names: `feat/<short>`, `fix/<short>`, `chore/<short>`
-- Open PR → follow template → request review from @Sarthak (codeowner) + @aditya
 - Squash-merge only.
 
 ## Folders
