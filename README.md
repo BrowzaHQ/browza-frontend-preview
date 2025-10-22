@@ -1,35 +1,26 @@
 # Browza Frontend (Next.js)
 
-
-
-
 ## Quick Start
 - Node 20+, pnpm recommended.
 - Install: `pnpm install`
 - Dev: `pnpm dev` → http://localhost:3000
+- Build: `pnpm build`
+- Start: `pnpm start`
 
 ## Branching & PRs
 - Branch names: `feat/<short>`, `fix/<short>`, `chore/<short>`
 - Open PR → follow template → request review from @Sarthak (codeowner) + @aditya
 - Squash-merge only.
 
-## Folder seed (to follow)
-- `/app` (routes)
-- `/components` (UI)
-- `/lib` (utils)
-- `/styles` (globals.css)
+## Folders
+- `/src/app` (routes)
+- `/src/components` (UI)
+- `/src/lib` (utils)
+- `/src/styles` (globals.css)
 
-## Browza Frontend (Next.js)
+## Architecture Decision Records
+We document decisions in `docs/adr/`.
 
-Install dependencies:
-npm install
-Start development server:
-npm dev
-→ App runs at http://localhost:3000
-
-Build for production:
-npm build
-Start production server:
-npm start
-
-
+- **ADR-0001 — Data Fetching & State Mgmt**  
+  Server data via **TanStack Query**; local UI state with React; **defer Redux** until a real cross-page global state emerges.  
+  See `docs/adr/0001-data-fetching-and-state.md`.
