@@ -17,7 +17,7 @@ permissions:
 jobs:
   analyze:
     name: Analyze (CodeQL)
-    # Skip analysis for PRs coming from forks (they don't have permission to upload SARIF)
+    # Skip for PRs from forks (they can't upload artifacts securely anyway)
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -32,16 +32,26 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          # JS/TS covers Next.js code
           languages: javascript-typescript
-          # Optional: run broader query packs
           queries: security-extended,security-and-quality
 
-      # For JS/TS CodeQL, autobuild is a no-op but safe to keep.
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
 
+      # 🔐 Do not upload to Code scanning for private repo w/o GHAS.
+      # We write SARIF files to ./results and attach them instead.
       - name: Perform CodeQL Analysis
+        id: analyze
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:javascript-typescript"
+          upload: false
+          output: results
+
+      - name: Upload SARIF as artifact (private repos)
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-sarif
+          path: results/**/*.sarif
+          retention-days: 7
+          if-no-files-found: warn
