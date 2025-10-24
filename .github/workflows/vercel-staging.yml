@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write   # optional
 
 jobs:
   staging:
@@ -15,6 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Deploy Staging (Preview) to Vercel
         id: vercel
         uses: amondnet/vercel-action@v25
@@ -24,6 +26,8 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: ./
+          github-comment: false     # 👈 prevents the failing comment step on push-to-main
+
       - name: Add Job Summary
         run: |
           echo "### 🚧 Staging Preview Ready (main)" >> $GITHUB_STEP_SUMMARY
