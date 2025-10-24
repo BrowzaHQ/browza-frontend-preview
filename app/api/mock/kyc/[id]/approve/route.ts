@@ -1,16 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { KycItemSchema, KycItem } from '@/types/kyc';
+import { KycItem } from '@/types/kyc';
 
-// Use a module-scoped store to mirror the list handler's data.
-// In real apps you'd centralize this module; for demo we keep it minimal.
 const store = getStore();
 
-export async function POST(req: NextRequest, context: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: { id: string } }) {
   await sleep(250);
-  const id = context.params.id;
+  const id = params.id;
 
-  // Optional reason
   const body = await req.json().catch(() => ({}));
   const reason = z.object({ reason: z.string().optional() }).parse(body).reason ?? '';
 
@@ -27,12 +24,10 @@ export async function POST(req: NextRequest, context: { params: { id: string } }
 function getStore() {
   // @ts-ignore
   if (!globalThis.__KYC_STORE__) {
-    // Lazy import to avoid duplication across routes
     // @ts-ignore
     globalThis.__KYC_STORE__ = { DATA: [] as KycItem[] };
   }
   // @ts-ignore
   return globalThis.__KYC_STORE__ as { DATA: KycItem[] };
 }
-
 function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)); }
