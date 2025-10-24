@@ -4,8 +4,8 @@ export const KycStatusEnum = z.enum(['pending', 'approved', 'rejected']);
 export const KycDocTypeEnum = z.enum(['PAN', 'AADHAAR', 'PASSPORT']);
 
 export const KycDocSchema = z.object({
-  type: z.string(),        // e.g., 'front', 'back'
-  url: z.string().url(),   // placeholder image URL
+  type: z.string(),
+  url: z.string().url(),
 });
 
 export const KycItemSchema = z.object({
@@ -13,7 +13,7 @@ export const KycItemSchema = z.object({
   applicant: z.string(),
   email: z.string().email(),
   docType: KycDocTypeEnum,
-  submittedAt: z.string(), // ISO timestamp
+  submittedAt: z.string(),
   status: KycStatusEnum,
   docs: z.array(KycDocSchema).default([]),
   notes: z.string().optional().default(''),
