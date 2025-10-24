@@ -7,7 +7,7 @@ const PAGE_SIZE_DEFAULT = 10;
 const listQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(PAGE_SIZE_DEFAULT),
-  status: z.nativeEnum(KycStatusEnum).optional(),
+status: KycStatusEnum.optional(),
   q: z.string().trim().min(1).optional(),
 });
 
