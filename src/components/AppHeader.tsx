@@ -1,6 +1,7 @@
 "use client";
 
-import { useSession } from "@/lib/useSession"; // your hook
+import { useSession } from "@/lib/useSession"; // if your hook path differs, update it
+
 export default function AppHeader() {
   const { user, logout } = useSession();
 
@@ -9,7 +10,7 @@ export default function AppHeader() {
       <div className="mx-auto max-w-7xl h-12 px-4 flex items-center justify-between">
         <span className="font-semibold tracking-wide">Browza</span>
         <div className="flex items-center gap-4">
-          {user && (
+          {!!user && (
             <span className="text-sm text-gray-300">
               {user.email} · {user.role}
             </span>
