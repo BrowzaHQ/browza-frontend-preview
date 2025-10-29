@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-dvh bg-[#0B0F19] text-gray-100 antialiased">
+      <body className="min-h-dvh bg-[#0B0F19]">
         <SessionBootstrap />   {/* hydrates session from /auth/me if a cookie exists */}
         {children}
         <Toaster />
