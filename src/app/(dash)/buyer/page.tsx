@@ -7,7 +7,7 @@ export default function Page() {
     <div>
       <Header />
       <main className="mx-auto max-w-6xl p-6">
-        <h1 className="mb-4 text-xl font-semibold">Buyer Dashboard</h1>
+        <h1 className="text-xl font-semibold mb-4">Buyer Dashboard</h1>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="bg-white text-gray-900">
