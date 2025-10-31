@@ -3,6 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   // Skip ESLint during Vercel builds for now
   eslint: { ignoreDuringBuilds: true },
+  images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
   env: {
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
     NEXT_PUBLIC_VERCEL_ENV: process.env.VERCEL_ENV || 'local',

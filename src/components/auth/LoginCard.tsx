@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { useSession } from "@/stores/useSession";
+import BrowzaLogo from "@/components/icons/BrowzaLogo";
 
 // Optional (icons). If you didn't add the package, comment these and the <CheckCircle/> usage below.
 let CheckCircle: any = (props: any) => (
@@ -21,17 +22,55 @@ try { CheckCircle = require("lucide-react").CheckCircle; } catch {}
 
 type LoginResp = { userId: string; email: string; role: "buyer" | "admin" };
 
+// Password validation helper
+function validatePassword(password: string) {
+  const checks = {
+    minLength: password.length >= 8,
+    hasLowercase: /[a-z]/.test(password),
+    hasUppercase: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+
+  const isValid = Object.values(checks).every(check => check);
+  
+  return { checks, isValid };
+}
+
 export default function LoginCard() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPasswordError, setShowPasswordError] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const setSession = useSession((s) => s.setSession);
 
+  const { checks, isValid } = validatePassword(password);
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPassword(value);
+    if (value.length > 0) {
+      setShowPasswordError(!validatePassword(value).isValid);
+    }
+  };
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    
+    if (!isValid) {
+      setShowPasswordError(true);
+      toast({ 
+        variant: "destructive", 
+        title: "Invalid password", 
+        description: "Please meet all password requirements" 
+      });
+      return;
+    }
+
     setLoading(true);
+
     try {
       const data = await api<LoginResp>("/auth/login", {
         method: "POST",
@@ -53,16 +92,12 @@ export default function LoginCard() {
       <div className="grid grid-cols-1 md:grid-cols-2">
         {/* LEFT: Brand / Benefits panel */}
         <div className="relative hidden md:block">
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-800 to-blue-600" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1f3a5d] to-[#0e326c]" />
           <CardContent className="relative h-full p-8 text-indigo-50">
             <div className="flex items-center gap-3">
               {/* Simple round logo mark */}
               <div className="grid h-9 w-9 place-items-center rounded-full bg-indigo-400/20 ring-1 ring-white/20">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 5c3.866 0 7 3.134 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M12 8c2.209 0 4 1.791 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
-                </svg>
+                <BrowzaLogo />
               </div>
               <div className="text-lg font-semibold tracking-tight">Browza • Buyer</div>
             </div>
@@ -118,14 +153,52 @@ export default function LoginCard() {
                   type="password"
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handlePasswordChange}
+                  onFocus={() => setShowPasswordError(true)}
                   required
                 />
+                
+                {/* Password validation messages */}
+                {showPasswordError && password.length > 0 && (
+                  <div className="space-y-1 pt-0.5">
+                    {!checks.minLength && (
+                      <p className="text-sm text-red-600">
+                        Password must be at least 8 characters
+                      </p>
+                    )}
+                    {!checks.hasLowercase && (
+                      <p className="text-sm text-red-600">
+                        Must contain at least one lowercase letter
+                      </p>
+                    )}
+                    {!checks.hasUppercase && (
+                      <p className="text-sm text-red-600">
+                        Must contain at least one uppercase letter
+                      </p>
+                    )}
+                    {!checks.hasNumber && (
+                      <p className="text-sm text-red-600">
+                        Must contain at least one number
+                      </p>
+                    )}
+                    {!checks.hasSpecialChar && (
+                      <p className="text-sm text-red-600">
+                        Must contain at least one special character (!@#$%^&*)
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <Button type="submit" disabled={loading} className="mt-2 w-full">
-                {!loading ? "Send OTP" : "Please wait…"}
-              </Button>
+        <Button type="submit" disabled={loading} className="mt-2 w-full bg-black hover:bg-black">
+                <span className="flex items-center justify-center gap-2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" strokeWidth="2"/>
+                    <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  {!loading ? "Send OTP" : "Please wait…"}
+                </span>
+              </Button>      
             </form>
           </div>
         </CardContent>
