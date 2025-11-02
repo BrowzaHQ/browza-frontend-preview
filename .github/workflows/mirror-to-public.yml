@@ -1,17 +1,26 @@
 name: Mirror PR -> Public Preview Repo
+
 on:
   pull_request_target:
     types: [opened, synchronize, reopened]
+
 permissions:
   contents: read
   pull-requests: read
+
 jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
       - name: Check secret presence
         run: |
-          test -n "${{ secrets.MIRROR_TOKEN }}" || { echo "MIRROR_TOKEN missing"; exit 1; }
+          if [ -z "${{ secrets.MIRROR_TOKEN }}" ]; then
+            echo "MIRROR_TOKEN is missing. Fix Secrets/Token/SSO."; exit 1
+          else
+            echo "MIRROR_TOKEN present ✅"
+          fi
+
+      # Checkout the PR's exact commit from the fork or branch safely
       - name: Checkout PR head safely
         uses: actions/checkout@v4
         with:
@@ -19,6 +28,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      # Optional debug: ensure token can read mirror
+      - name: Token can read mirror?
+        env:
+          MIRROR_URL: https://x-access-token:${{ secrets.MIRROR_TOKEN }}@github.com/BrowzaHQ/browza-frontend-preview.git
+        run: |
+          git ls-remote "$MIRROR_URL" >/dev/null && echo "Can read ✅" || { echo "Cannot read ❌"; exit 1; }
+
       - name: Push branch to public mirror
         env:
           MIRROR_URL: https://x-access-token:${{ secrets.MIRROR_TOKEN }}@github.com/BrowzaHQ/browza-frontend-preview.git
