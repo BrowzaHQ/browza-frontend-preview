@@ -1,0 +1,30 @@
+name: Mirror PR -> Public Preview Repo
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Push branch to public mirror
+        env:
+          MIRROR_URL: https://x-access-token:${{ secrets.MIRROR_TOKEN }}@github.com/BrowzaHQ/browza-frontend-preview.git
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          git config user.name "browza-bot"
+          git config user.email "bot@browza.in"
+          git remote add mirror "$MIRROR_URL"
+          git push --force mirror "HEAD:refs/heads/$BRANCH"
