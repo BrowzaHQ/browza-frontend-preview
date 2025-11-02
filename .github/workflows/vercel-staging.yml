@@ -2,12 +2,11 @@ name: Vercel Staging (main)
 
 on:
   push:
-    branches: [main]     # auto-runs whenever main updates
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,34 +17,37 @@ jobs:
           node-version: 20
           cache: npm
 
-      # Pull project settings + envs from Vercel (Preview env)
+      # Make sure all three secrets are present (fast fail with a clear message)
+      - name: Sanity check Vercel secrets
+        run: |
+          test -n "${{ secrets.VERCEL_PROJECT_ID }}" || (echo "VERCEL_PROJECT_ID missing" && exit 1)
+          test -n "${{ secrets.VERCEL_ORG_ID }}"     || (echo "VERCEL_ORG_ID missing" && exit 1)
+          test -n "${{ secrets.VERCEL_TOKEN }}"      || (echo "VERCEL_TOKEN missing" && exit 1)
+
+      # Pull project settings + preview envs from Vercel
       - name: Pull Vercel config (preview)
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        run: npx -y vercel@latest pull --yes --environment=preview
+        run: npx -y vercel@latest pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Build locally on the runner (so we can deploy a prebuilt artifact)
+      # Build locally on the runner
       - name: Build
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        run: npx -y vercel@latest build
+        run: npx -y vercel@latest build --token=${{ secrets.VERCEL_TOKEN }}
 
       # Deploy the prebuilt artifact as a Preview deployment
       - name: Deploy (prebuilt) to Preview
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        run: npx -y vercel@latest deploy --prebuilt --target=preview
+        run: npx -y vercel@latest deploy --prebuilt --target=preview --token=${{ secrets.VERCEL_TOKEN }}
 
-      # OPTIONAL: if you want main to publish a Production deployment instead, replace the previous step with:
+      # If you want main to go to Production instead, replace the previous step with:
       # - name: Deploy (prebuilt) to Production
       #   env:
-      #     VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       #     VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      #   run: npx -y vercel@latest deploy --prebuilt --prod
+      #   run: npx -y vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
