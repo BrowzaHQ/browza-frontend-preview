@@ -74,7 +74,7 @@ export default function LoginCard() {
     try {
       const data = await api<LoginResp>("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({  email:identifier, password }),
       });
       // simple helper cookie so middleware can redirect
       document.cookie = `role=${data.role}; path=/; max-age=${60 * 60 * 24 * 7};`;
