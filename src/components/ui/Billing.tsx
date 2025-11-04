@@ -30,7 +30,6 @@ const MOCK_INVOICES = [
     total: "₹1,156",
     status: "PAID",
   },
-  // add up to 10 mock rows if needed
 ];
 
 export function Billing() {
@@ -56,7 +55,7 @@ export function Billing() {
 
       {/* Top cards */}
       <div className="grid gap-4 md:grid-cols-5">
-        {/* Account balance card (wider) */}
+        {/* Account balance card */}
         <Card className="md:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm text-muted-foreground">
@@ -73,7 +72,6 @@ export function Billing() {
           </CardContent>
         </Card>
 
-        {/* KPI cards */}
         <InsightsCard
           label="Active jobs"
           value="12"
