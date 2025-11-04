@@ -1,6 +1,6 @@
 // src/components/ui/InsightsCard.tsx
 import * as React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type Tone = "default" | "success" | "warning";
@@ -31,9 +31,9 @@ export function InsightsCard({
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+        <div className="text-sm font-medium text-muted-foreground">
           {label}
-        </CardTitle>
+          </div>
         {icon ? <div className="text-muted-foreground">{icon}</div> : null}
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
