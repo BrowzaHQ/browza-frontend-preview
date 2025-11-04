@@ -43,20 +43,6 @@ type LoginResp = {
   token?: string;
 };
 
-// Client-side password validation UI helper
-function validatePassword(password: string) {
-  const checks = {
-    minLength: password.length >= 8,
-    hasLowercase: /[a-z]/.test(password),
-    hasUppercase: /[A-Z]/.test(password),
-    hasNumber: /[0-9]/.test(password),
-    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
-  };
-  const isValid = Object.values(checks).every(Boolean);
-  return { checks, isValid };
-
-}
-
 export default function LoginCard() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
