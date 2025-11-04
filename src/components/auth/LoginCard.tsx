@@ -1,5 +1,6 @@
 "use client";
 
+import { validatePassword } from "@/lib/password";
 import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
