@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/apiClient";
@@ -11,16 +12,48 @@ import Button from "@/components/ui/button";
 import { useSession } from "@/stores/useSession";
 import BrowzaLogo from "@/components/icons/BrowzaLogo";
 
-// Optional (icons). If you didn't add the package, comment these and the <CheckCircle/> usage below.
+// Optional (icons). If lucide-react isn't available, fallback to inline SVG.
 let CheckCircle: any = (props: any) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" {...props}>
-    <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+    <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
-try { CheckCircle = require("lucide-react").CheckCircle; } catch {}
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  CheckCircle = require("lucide-react").CheckCircle;
+} catch {}
 
-type LoginResp = { userId: string; email: string; role: "buyer" | "admin" };
+/** Demo toggle (kept for convenience; set NEXT_PUBLIC_DEMO_LOGIN=false on Vercel to use real backend) */
+const DEMO_ENABLED = (process.env.NEXT_PUBLIC_DEMO_LOGIN || "").toLowerCase() === "true";
+const DEMO_USERS: Record<string, { role: "buyer" | "admin"; redirect: "/buyer" | "/admin" }> = {
+  "buyer@demo.browza": { role: "buyer", redirect: "/buyer" },
+  "admin@demo.browza": { role: "admin", redirect: "/admin" },
+};
+
+// Shared password policy (same as BE)
+const PASS_POLICY =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
+type LoginResp = {
+  userId: string;
+  email: string;
+  role: "buyer" | "admin";
+  token?: string;
+};
+
+// Client-side password validation UI helper
+function validatePassword(password: string) {
+  const checks = {
+    minLength: password.length >= 8,
+    hasLowercase: /[a-z]/.test(password),
+    hasUppercase: /[A-Z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+  const isValid = Object.values(checks).every(Boolean);
+  return { checks, isValid };
+}
 
 // Password validation helper
 function validatePassword(password: string) {
@@ -42,6 +75,7 @@ export default function LoginCard() {
   const [password, setPassword] = useState("");
   const [showPasswordError, setShowPasswordError] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const { toast } = useToast();
   const router = useRouter();
   const setSession = useSession((s) => s.setSession);
@@ -51,20 +85,19 @@ export default function LoginCard() {
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPassword(value);
-    if (value.length > 0) {
-      setShowPasswordError(!validatePassword(value).isValid);
-    }
+    if (value.length > 0) setShowPasswordError(!validatePassword(value).isValid);
   };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
+    // front-end policy gate (matches BE)
     if (!isValid) {
       setShowPasswordError(true);
-      toast({ 
-        variant: "destructive", 
-        title: "Invalid password", 
-        description: "Please meet all password requirements" 
+      toast({
+        variant: "destructive",
+        title: "Invalid password",
+        description: "Please meet all password requirements.",
       });
       return;
     }
@@ -72,16 +105,45 @@ export default function LoginCard() {
     setLoading(true);
 
     try {
+      const email = (identifier || "").trim().toLowerCase();
+
+      /** Demo bypass (only when NEXT_PUBLIC_DEMO_LOGIN=true) */
+      if (DEMO_ENABLED && DEMO_USERS[email]) {
+        if (!PASS_POLICY.test(password)) {
+          toast({
+            variant: "destructive",
+            title: "Invalid password",
+            description: "Password must include upper, lower, number and special character.",
+          });
+          setLoading(false);
+          return;
+        }
+        const { role, redirect } = DEMO_USERS[email];
+        // minimal client "session" (cookie) so FE guards work in demo
+        document.cookie = `role=${role}; path=/; max-age=${60 * 60 * 24 * 7};`;
+        setSession({ userId: "demo", email, role });
+        router.replace(redirect);
+        return;
+      }
+
+      /** Real backend call */
+      const payload = { email, password };
       const data = await api<LoginResp>("/auth/login", {
         method: "POST",
-        body: JSON.stringify({  email:identifier, password }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-      // simple helper cookie so middleware can redirect
+
+      // simple cookie so your FE middleware/guards can read role
       document.cookie = `role=${data.role}; path=/; max-age=${60 * 60 * 24 * 7};`;
       setSession({ userId: data.userId, email: data.email, role: data.role });
       router.replace(data.role === "admin" ? "/admin" : "/buyer");
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Login failed", description: err?.message || "Try again." });
+      toast({
+        variant: "destructive",
+        title: "Login failed",
+        description: err?.message || "Request failed. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -90,12 +152,11 @@ export default function LoginCard() {
   return (
     <Card className="w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-xl">
       <div className="grid grid-cols-1 md:grid-cols-2">
-        {/* LEFT: Brand / Benefits panel */}
+        {/* LEFT: Brand / Benefits */}
         <div className="relative hidden md:block">
           <div className="absolute inset-0 bg-gradient-to-b from-[#1f3a5d] to-[#0e326c]" />
           <CardContent className="relative h-full p-8 text-indigo-50">
             <div className="flex items-center gap-3">
-              {/* Simple round logo mark */}
               <div className="grid h-9 w-9 place-items-center rounded-full bg-indigo-400/20 ring-1 ring-white/20">
                 <BrowzaLogo />
               </div>
@@ -157,48 +218,28 @@ export default function LoginCard() {
                   onFocus={() => setShowPasswordError(true)}
                   required
                 />
-                
+
                 {/* Password validation messages */}
                 {showPasswordError && password.length > 0 && (
                   <div className="space-y-1 pt-0.5">
-                    {!checks.minLength && (
-                      <p className="text-sm text-red-600">
-                        Password must be at least 8 characters
-                      </p>
-                    )}
-                    {!checks.hasLowercase && (
-                      <p className="text-sm text-red-600">
-                        Must contain at least one lowercase letter
-                      </p>
-                    )}
-                    {!checks.hasUppercase && (
-                      <p className="text-sm text-red-600">
-                        Must contain at least one uppercase letter
-                      </p>
-                    )}
-                    {!checks.hasNumber && (
-                      <p className="text-sm text-red-600">
-                        Must contain at least one number
-                      </p>
-                    )}
-                    {!checks.hasSpecialChar && (
-                      <p className="text-sm text-red-600">
-                        Must contain at least one special character (!@#$%^&*)
-                      </p>
-                    )}
+                    {!checks.minLength && <p className="text-sm text-red-600">Password must be at least 8 characters</p>}
+                    {!checks.hasLowercase && <p className="text-sm text-red-600">Must contain at least one lowercase letter</p>}
+                    {!checks.hasUppercase && <p className="text-sm text-red-600">Must contain at least one uppercase letter</p>}
+                    {!checks.hasNumber && <p className="text-sm text-red-600">Must contain at least one number</p>}
+                    {!checks.hasSpecialChar && <p className="text-sm text-red-600">Must contain at least one special character (!@#$%^&*)</p>}
                   </div>
                 )}
               </div>
 
-        <Button type="submit" disabled={loading} className="mt-2 w-full bg-black hover:bg-black">
+              <Button type="submit" disabled={loading} className="mt-2 w-full bg-black hover:bg-black">
                 <span className="flex items-center justify-center gap-2">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" strokeWidth="2"/>
-                    <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2" strokeLinecap="round"/>
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" strokeWidth="2" />
+                    <line x1="12" y1="18" x2="12.01" y2="18" strokeWidth="2" strokeLinecap="round" />
                   </svg>
-                  {!loading ? "Send OTP" : "Please wait…"}
+                  {loading ? "Please wait…" : "Sign in"}
                 </span>
-              </Button>      
+              </Button>
             </form>
           </div>
         </CardContent>
