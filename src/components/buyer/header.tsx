@@ -8,11 +8,15 @@ import { useBuyerStore } from '@/stores/buyer-store';
 import { Plus } from 'lucide-react';
 import BrowzaLogo from '../icons/BrowzaLogo';
 import { BuyerNav } from './nav';
+import { AddCreditsDialog } from './add-credits-dialog';
+import { useState } from 'react';
 
 export function BuyerHeader() {
   const { orgName, orgAvatar, comName, userName, walletBalance, gbAvailable } = useBuyerStore();
+const [showAddCredits, setShowAddCredits] = useState(false);
 
   return (
+    <>
     <header className="border-b-[0.8px] border-gray-200 bg-[#F8F9FA]">
       <div className="flex h-[72px] items-center justify-between px-6">
         {/* Left: Org Logo + Name + Subtitle */}
@@ -52,7 +56,9 @@ export function BuyerHeader() {
           </div>
 
           {/* Add Credits Button */}
-          <Button size="sm" className="gap-1.5 bg-gray-900 hover:bg-gray-800">
+          <Button
+             onClick={() => setShowAddCredits(true)}
+          size="sm" className="gap-1.5 bg-gray-900 hover:bg-gray-800">
             <Plus className="h-3 w-3" />
             <span className="text-xs">Add Credits</span>
           </Button>
@@ -73,5 +79,7 @@ export function BuyerHeader() {
         </div>
       </div>
     </header>
+     <AddCreditsDialog open={showAddCredits} onOpenChange={setShowAddCredits} />
+    </>
   );
 }

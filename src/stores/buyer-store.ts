@@ -4,21 +4,25 @@ import { create } from 'zustand';
 interface BuyerStore {
   orgName: string;
   orgAvatar: string;
-  userName: string;
   comName: string;
+  userName: string;
   walletBalance: number;
   gbAvailable: string;
   setWalletBalance: (balance: number) => void;
+  addToBalance: (amount: number) => void;
   setGbAvailable: (gb: string) => void;
 }
 
 export const useBuyerStore = create<BuyerStore>((set) => ({
   orgName: 'Browza',
   orgAvatar: '/avatars/user.png',
+  comName: 'TechCorp Solutions',
   userName: 'Rahul Sharma',
-  comName:"TechCorp Solutions",
   walletBalance: 2500,
   gbAvailable: '178',
   setWalletBalance: (balance) => set({ walletBalance: balance }),
+  addToBalance: (amount) => set((state) => ({ 
+    walletBalance: state.walletBalance + amount 
+  })),
   setGbAvailable: (gb) => set({ gbAvailable: gb }),
 }));
