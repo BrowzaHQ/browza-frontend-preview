@@ -1,34 +1,27 @@
-name: Release to Production (manual)
+# .github/workflows/vercel-staging.yml
+name: Vercel Staging (main)
 
 on:
-  workflow_dispatch: {}
+  push:
+    branches: [ main ]
 
 permissions:
   contents: read
 
 jobs:
-  release:
-    # 👇 this invokes the Environment gate you created
-    environment:
-      name: production
-      # optional, shows a nice link on the deploy in the UI:
-      url: https://your-production-domain.com
-
+  staging:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Deploy Production to Vercel
+      - name: Deploy Staging (no PR comment on push)
         uses: amondnet/vercel-action@v25
         with:
-          # If you moved secrets to the Environment, they resolve the same way:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           working-directory: ./
-          vercel-args: '--prod'
+          github-comment: false     # <- important: don’t try to comment on push
