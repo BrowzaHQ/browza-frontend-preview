@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Skip ESLint during Vercel builds for now
-  eslint: { ignoreDuringBuilds: true },
+  // Note: eslint configuration removed as it's deprecated in Next.js 16
+  // Use eslint.config.mjs for ESLint v9 flat config instead
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
