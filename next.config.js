@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Note: eslint configuration removed as it's deprecated in Next.js 16
-  // Use eslint.config.mjs for ESLint v9 flat config instead
+  // Note: eslint.ignoreDuringBuilds option removed - deprecated in Next.js 16
+  // ESLint 9 is now configured via eslint.config.mjs (flat config)
 };
 module.exports = nextConfig;

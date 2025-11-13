@@ -1,22 +1,21 @@
-// ESLint v9 Flat Config
-// This configuration uses the new flat config format introduced in ESLint v9
-// See: https://eslint.org/docs/latest/use/configure/configuration-files-new
-
+// ESLint 9 flat config format
+// Migrated from .eslintrc.json to support ESLint 9.39.1
+// See: https://eslint.org/docs/latest/use/configure/configuration-files
 import nextConfig from 'eslint-config-next/core-web-vitals';
 
 const config = [
-  // Extend Next.js recommended ESLint configuration
-  // This includes React, React Hooks, and Next.js specific rules
+  // Spread Next.js core web vitals configuration
   ...nextConfig,
+  // Global ignores for ESLint v9
   {
-    // Ignore patterns for ESLint v9
-    // These directories are excluded from linting
+    // Files and directories to ignore during linting
     ignores: [
-      '.next/**',        // Next.js build output
-      'out/**',          // Next.js static export output
-      'build/**',        // Build artifacts
-      'next-env.d.ts',   // Next.js TypeScript declarations
-      'node_modules/**', // Dependencies
+      '.next/**',
+      'out/**',
+      'build/**',
+      'next-env.d.ts',
+      'node_modules/**',
+      'dist/**',
     ],
   },
 ];
